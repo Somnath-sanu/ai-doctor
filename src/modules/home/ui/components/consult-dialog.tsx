@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/src/components/ui/dialog";
 import { useVapi } from "../../hooks/use-vapi";
-import { AIDoctorAgents } from "@/lib/agents";
+import { AIDoctorAgents } from "@/src/lib/agents";
 import { PhoneCallIcon, PhoneOffIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
@@ -24,6 +24,11 @@ export function ConsultDialog({
   onOpenChange,
   doctor,
 }: ConsultDialogProps) {
+  // this cause issues as we cann't render hook conditionaly
+  // if (!doctor.assistantId) { 
+  //   return null;
+  // }
+
   const { isConnected, isSpeaking, transcript, startCall, endCall } = useVapi(
     doctor.assistantId as string
   );

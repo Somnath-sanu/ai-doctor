@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/src/components/ui/dialog";
+import { Textarea } from "@/src/components/ui/textarea";
 import { ArrowRightIcon, PlusIcon } from "lucide-react";
 
 export const AddNewSession = () => {

@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { AIDoctorAgents } from "@/lib/agents";
+import { Button } from "@/src/components/ui/button";
+import { AIDoctorAgents } from "@/src/lib/agents";
 import { ArrowRightIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { ConsultDialog } from "./consult-dialog";
-import { cn } from "@/lib/utils";
+import { cn } from "@/src/lib/utils";
 
 export const AgentList = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<

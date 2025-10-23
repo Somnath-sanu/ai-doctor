@@ -1,7 +1,7 @@
 "server-only";
 
-import { CREDITS } from "@/constants";
-import prisma from "@/lib/db";
+import { CREDITS } from "@/src/constants";
+import prisma from "@/src/lib/db";
 
 export const upserUser = async (
   firstName: string | null,
