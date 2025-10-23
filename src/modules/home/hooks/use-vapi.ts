@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Vapi from "@vapi-ai/web";
 
-export const useVapi = () => {
+export const useVapi = (assistantId: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<
@@ -53,15 +53,16 @@ export const useVapi = () => {
       vapi.removeAllListeners();
       vapi.stop();
     };
-  }, []);
+  }, [assistantId]);
 
   const startCall = () => {
     if (vapiInstance.current) {
-      vapiInstance.current.start(process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID!);
+      vapiInstance.current.start(assistantId);
     }
   };
   const endCall = () => {
     if (vapiInstance.current) {
+      setTranscript([]);
       vapiInstance.current.stop();
       vapiInstance.current.removeAllListeners();
     }
