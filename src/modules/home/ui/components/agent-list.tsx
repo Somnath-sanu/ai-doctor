@@ -21,9 +21,9 @@ export const AgentList = () => {
     setIsDialogOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (val: boolean) => {
     setSelectedDoctor(null);
-    setIsDialogOpen(false);
+    setIsDialogOpen(val);
   };
 
   return (
