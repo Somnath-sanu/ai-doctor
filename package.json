@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:migrate": "pnpm dlx prisma migrate dev",
     "db:generate": "pnpm dlx prisma generate",
-    "db:reset": "pnpm dlx prisma migrate reset"
+    "db:reset": "pnpm dlx prisma migrate reset",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",
