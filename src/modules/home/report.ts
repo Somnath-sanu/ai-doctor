@@ -45,7 +45,7 @@ export const getReport = async (): Promise<Report[] | null> => {
     }
     return await response.json();
   } catch (error) {
-    console.error("Error generating report:", error);
+    console.error("Error fetching report:", error);
     return null;
   }
 };
