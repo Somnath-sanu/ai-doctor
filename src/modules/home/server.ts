@@ -6,7 +6,8 @@ import prisma from "@/src/lib/db";
 export const upserUser = async (
   firstName: string | null,
   lastName: string | null,
-  email: string
+  email: string,
+  id: string
 ) => {
   try {
     const existingUser = await prisma.user.findUnique({
@@ -18,6 +19,7 @@ export const upserUser = async (
     if (!existingUser) {
       await prisma.user.create({
         data: {
+          id,
           email: email,
           name: `${firstName} ${lastName}`,
           credits: CREDITS,

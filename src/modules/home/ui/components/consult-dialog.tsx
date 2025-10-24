@@ -7,9 +7,14 @@ import {
 } from "@/src/components/ui/dialog";
 import { useVapi } from "../../hooks/use-vapi";
 import { AIDoctorAgents } from "@/src/lib/agents";
-import { PhoneCallIcon, PhoneOffIcon } from "lucide-react";
+import {
+  FileDownIcon,
+  Loader2Icon,
+  PhoneCallIcon,
+  PhoneOffIcon,
+} from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type AIDoctorAgent = (typeof AIDoctorAgents)[number];
 
@@ -25,15 +30,23 @@ export function ConsultDialog({
   doctor,
 }: ConsultDialogProps) {
   // this cause issues as we cann't render hook conditionaly
-  // if (!doctor.assistantId) { 
+  // if (!doctor.assistantId) {
   //   return null;
   // }
 
-  const { isConnected, isSpeaking, transcript, startCall, endCall } = useVapi(
-    doctor.assistantId as string
-  );
+  const {
+    isConnected,
+    isSpeaking,
+    isLoading,
+    transcript,
+    startCall,
+    endCall,
+    createReport,
+  } = useVapi(doctor.assistantId as string);
 
   const scrollToBottomRef = useRef<HTMLDivElement>(null);
+
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   useEffect(() => {
     if (scrollToBottomRef.current) {
@@ -44,13 +57,30 @@ export function ConsultDialog({
     }
   }, [transcript]);
 
-  const handleEndCall = () => {
-    endCall();
-    onOpenChange(false);
+  const handleCreateReport = async () => {
+    setIsGeneratingReport(true);
+    const { success } = await createReport(doctor.specialist);
+    setIsGeneratingReport(false);
+    if (success) {
+      onOpenChange(false);
+    }
   };
 
+  const handleEndCall = () => {
+    endCall();
+    handleCreateReport();
+  };
+
+  // I don't want clicking outside close the dialog when call is connected
   return (
-    <Dialog open={isOpen} onOpenChange={handleEndCall}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        if (!isConnected) {
+          onOpenChange(false);
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Consultation with {doctor.specialist}</DialogTitle>
@@ -101,21 +131,38 @@ export function ConsultDialog({
           </div>
 
           <div className="flex justify-center gap-4">
-            {!isConnected ? (
+            {!isConnected && transcript.length === 0 ? (
               <Button
                 onClick={startCall}
-                className="w-32 cursor-pointer rounded-xl"
+                className="cursor-pointer rounded-xl"
               >
-                <PhoneCallIcon className="mr-2 h-4 w-4" />
-                Start Call
+                {isLoading ? (
+                  <Loader2Icon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <PhoneCallIcon className="h-4 w-4" />
+                )}
+                {isLoading ? "Starting..." : "Start Call"}
+              </Button>
+            ) : transcript.length > 0 && !isConnected ? (
+              <Button
+                variant="destructive"
+                className="cursor-pointer rounded-xl"
+                onClick={handleCreateReport}
+              >
+                {isGeneratingReport ? (
+                  <Loader2Icon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FileDownIcon className="h-4 w-4" />
+                )}
+                {isGeneratingReport ? "generating..." : "Generate Report"}
               </Button>
             ) : (
               <Button
                 onClick={handleEndCall}
                 variant="destructive"
-                className="w-32 cursor-pointer rounded-xl"
+                className="cursor-pointer rounded-xl"
               >
-                <PhoneOffIcon className="mr-2 h-4 w-4" />
+                <PhoneOffIcon className="h-4 w-4" />
                 End Call
               </Button>
             )}
