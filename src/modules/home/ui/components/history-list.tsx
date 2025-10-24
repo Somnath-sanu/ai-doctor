@@ -59,7 +59,7 @@ export const HistoryList = () => {
             <AddNewSession />
           </div>
         ) : (
-          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 py-2">
             {reports.map((report) => (
               <ReportCard
                 key={report.id}
