@@ -11,7 +11,7 @@ interface ReportCardProps {
 export const ReportCard = ({ report, onClick }: ReportCardProps) => {
   return (
     <Card
-      className="p-2 hover:bg-accent transition-colors cursor-pointer"
+      className="p-2 hover:bg-accent transition-colors cursor-pointer shadow-none"
       onClick={onClick}
     >
       <div className="flex flex-col gap-1">

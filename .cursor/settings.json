@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "firecrawl": {
+      "enabled": true
+    },
+    "figma": {
+      "enabled": true
+    },
+    "prisma": {
+      "enabled": true
+    }
+  }
+}

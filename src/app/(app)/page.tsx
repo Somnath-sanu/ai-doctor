@@ -9,11 +9,10 @@ export default async function Home() {
     return <div>Sign in to view this page</div>;
   }
 
-  const { firstName, lastName, emailAddresses , id } = user;
-  const email = emailAddresses[0].emailAddress;
-  await upserUser(firstName, lastName, email , id);
+  const { firstName, lastName, emailAddresses, id } = user;
+  const email = emailAddresses[0]?.emailAddress;
+  await upserUser(firstName, lastName, email, id);
 
-  return (
-    <HomeView/>
-  );
+  return <HomeView />;
 }
+

@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/src/components/ui/dialog";
 import { Textarea } from "@/src/components/ui/textarea";
+import { Label } from "@/src/components/ui/label";
 import { ArrowRightIcon, PlusIcon } from "lucide-react";
 
 export const AddNewSession = () => {
@@ -25,14 +26,20 @@ export const AddNewSession = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Basic Details</DialogTitle>
-          <DialogDescription asChild>
-            <div>
-              <h2>Add Symptons or any other Details</h2>
-            </div>
+          <DialogDescription>
+            Share any symptoms, recent changes, or context that will help the
+            doctor understand your concern.
           </DialogDescription>
         </DialogHeader>
 
-        <Textarea placeholder="Add Detail here..." className="h-[200px]" />
+        <div className="space-y-2">
+          <Label htmlFor="consultation-notes">Consultation details</Label>
+          <Textarea
+            id="consultation-notes"
+            placeholder="Describe your symptoms, duration, and any relevant history..."
+            className="min-h-[140px] max-h-64"
+          />
+        </div>
 
         <DialogFooter>
           <DialogClose asChild>

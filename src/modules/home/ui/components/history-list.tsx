@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+
 import { useCallback, useEffect, useState } from "react";
 import { AddNewSession } from "./add-new-session";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -8,6 +8,9 @@ import { getReport } from "../../report";
 import { ReportCard } from "./report-card";
 import { ReportDialog } from "./report-dialog";
 import { Loader2Icon } from "lucide-react";
+import { EmptyState } from "@/src/components/layout/empty-state";
+import { ScrollablePane } from "@/src/components/layout/scrollable-pane";
+import { Stethoscope } from "lucide-react";
 
 export const HistoryList = () => {
   const [selectedReport, setSelectedReport] =
@@ -29,7 +32,7 @@ export const HistoryList = () => {
 
   if (!reports) {
     return (
-      <div className="flex items-center justify-center flex-1">
+      <div className="flex items-center justify-center py-10">
         <Loader2Icon className="size-8 animate-spin" />
       </div>
     );
@@ -41,35 +44,26 @@ export const HistoryList = () => {
         report={selectedReport}
         onClose={() => setSelectedReport(null)}
       />
-      <div>
-        {reports.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-5 border p-7 border-border border-dashed shadow rounded-2xl">
-            <Image
-              src={"/medical-assistance.png"}
-              alt="empty"
-              width={150}
-              height={150}
-            />
-            <h2 className="text-xl font-bold">No Recent Consultations</h2>
-            <p>
-              It&apos; looks like you haven&apos;t consulted with any doctors
-              yet!
-            </p>
-
+      {reports.length === 0 ? (
+        <EmptyState
+          title="No recent consultations yet"
+          description="Start a new consultation and your summaries will appear here for quick reference."
+          icon={Stethoscope}
+          action={
             <AddNewSession />
-          </div>
-        ) : (
-          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 py-2">
-            {reports.map((report) => (
-              <ReportCard
-                key={report.id}
-                report={report}
-                onClick={() => setSelectedReport(report)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+          }
+        />
+      ) : (
+        <ScrollablePane className="mt-1 space-y-3 py-1">
+          {reports.map((report) => (
+            <ReportCard
+              key={report.id}
+              report={report}
+              onClick={() => setSelectedReport(report)}
+            />
+          ))}
+        </ScrollablePane>
+      )}
     </>
   );
 };

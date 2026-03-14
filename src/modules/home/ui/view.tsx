@@ -4,21 +4,36 @@ import { Button } from "@/src/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { HistoryList } from "./components/history-list";
 import { AgentList } from "./components/agent-list";
+import { PageHeader } from "@/src/components/layout/page-header";
 
 export const HomeView = () => {
   return (
-    <div className="flex flex-1 items-center justify-center max-w-5xl py-16 w-full mx-auto">
-      <div className="w-full space-y-8">
-        <div className="flex justify-between flex-1 items-center">
-          <h2 className="font-bold text-2xl">My Dashboard</h2>
-
-          <Button variant={"outline"} className="cursor-pointer">
-            <PlusIcon />
-            Consult with Doctor
+    <div className="w-full space-y-6">
+      <PageHeader
+        title="My Dashboard"
+        description="Review your recent consultations and connect with AI specialist doctors."
+        action={
+          <Button variant="outline" className="cursor-pointer">
+            <PlusIcon className="mr-1.5 size-4" />
+            Consult with doctor
           </Button>
-        </div>
-        <HistoryList />
-        <AgentList />
+        }
+      />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            Recent consultations
+          </h2>
+          <HistoryList />
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            AI specialist doctors
+          </h2>
+          <AgentList limit={3} showViewAllLink />
+        </section>
       </div>
     </div>
   );

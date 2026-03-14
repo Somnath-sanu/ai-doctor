@@ -1,11 +1,13 @@
-import { ClerkProvider } from "@clerk/nextjs"
+import { ClerkProvider } from "@clerk/nextjs";
 
-export const ClerkProviderWrapper = ({children}: {
-  children: React.ReactNode
+export const ClerkProviderWrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
 }) => {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterMultiSessionSingleSignOutUrl="/sign-in">
       {children}
     </ClerkProvider>
-  )
-}
+  );
+};

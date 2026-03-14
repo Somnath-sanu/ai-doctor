@@ -1,0 +1,291 @@
+---
+description: Guidelines for migrating an app to Prisma ORM v7
+alwaysApply: false
+---
+## Prisma v6 → v7 Migration Assistant
+
+**Role:** You are a precise, changeset-oriented code migration assistant. Apply the steps below to upgrade a project from **Prisma ORM v6** to **Prisma ORM v7** with minimal disruption. Work in small, re-viewable steps and explain each change briefly. If something is unclear, assume sensible defaults that keep the app compiling and retaining functionality.
+
+### Ground Rules
+
+- **No Accelerate changes**: Never introduce Prisma Accelerate or HTTP/WebSocket drivers on your own. Do **not** remove Prisma Accelerate automatically.
+- **Accelerate with caching**: If Accelerate is in use with caching, preserve it and print guidance about future changes.
+- **Accelerate without caching**: If Accelerate is used without caching, suggest switching to Direct TCP + adapter, but do not modify existing Accelerate code.
+- **Env loading**: Always load env variables explicitly using `dotenv` (`import "dotenv/config"`), unless the runtime is Bun (then skip `dotenv`).
+- **Module style**: Keep TypeScript ESM compatible and avoid CommonJS `require`.
+- **Edits**: Favor additive, reversible edits; do not remove user logic.
+- **MongoDB**: If the schema uses MongoDB, stop and output a clear message to remain on Prisma v6 for now.
+
+### 0) Detect Context & Plan
+
+When starting a migration, first detect:
+
+- **Package manager and scripts**.
+- **Database provider** from `datasource db` (`postgresql`, `mysql`, `sqlite`, `sqlserver`, etc.). If `mongodb`, stop and recommend staying on Prisma v6.
+- **Prisma Client import style**: whether `@prisma/client` is imported from `node_modules` or a generated path.
+- **Prisma Accelerate usage**:
+  - Look for `withAccelerate({ cache: ... })`.
+  - Look for `PRISMA_ACCELERATE_CACHE_*` env vars.
+  - Look for any `accelerate:` config.
+
+Based on detection:
+
+- **Accelerate + caching**: Print  
+  `Prisma Accelerate Caching detected — Prisma recommends keeping Accelerate for caching scenarios.`
+- **Accelerate without caching**: Print  
+  `Accelerate detected but caching is not enabled. In Prisma v7, Direct TCP + adapters are recommended unless caching is required.`
+- **No Accelerate**: Continue normally and prefer Direct TCP with an appropriate adapter.
+
+Do not modify or remove Accelerate code paths; only describe recommendations.
+
+### 1) Dependencies
+
+Ensure dependencies are updated/installed:
+
+- **Dev dependencies**:
+  - `prisma@latest` (v7)
+  - `tsx`
+  - `dotenv` (skip if the runtime is Bun)
+- **Runtime dependencies**:
+  - `@prisma/client@latest` (v7)
+  - Exactly **one** database adapter matching the datasource:
+    - Postgres: `@prisma/adapter-ppg`
+    - SQLite: `@prisma/adapter-better-sqlite3`
+    - MySQL/MariaDB: `@prisma/adapter-mariadb`
+    - D1: `@prisma/adapter-d1`
+    - PlanetScale: `@prisma/adapter-planetscale`
+    - MSSQL: `@prisma/adapter-mssql`
+    - CockroachDB: `@prisma/adapter-pg`
+    - Neon: `@prisma/adapter-neon`
+
+Use installation commands that match the repo’s package manager (npm, pnpm, yarn, bun). Do **not** remove any Accelerate packages automatically; only output guidance:
+
+- If Accelerate + caching is detected, echo:  
+  `Prisma Accelerate Caching detected — keeping Accelerate is recommended.`
+- If Accelerate is present but caching is not:  
+  `Accelerate detected without caching — Prisma v7 suggests adopting Direct TCP with a database adapter for best performance.`
+
+Never eliminate user code in this step.
+
+### 2) Prisma Schema Changes
+
+In `prisma/schema.prisma`:
+
+- **Update generator**:
+
+  ```diff
+  - generator client {
+  -   provider = "prisma-client-js"
+  - }
+  + generator client {
+  +   provider = "prisma-client"
+  +   output   = "./generated"
+  + }
+  ```
+
+  Preserve any other existing generator options besides `provider` and add `output` as shown.
+
+- **Remove feature flags and engine options**:
+  - Remove any `previewFeatures = ["driverAdapters", ...]` entries.
+  - Remove any `engineType` attributes.
+
+- **Update datasource**:
+  - In the `datasource db` block, keep the existing `provider` value exactly as-is.
+  - Remove only the `url = ...` line.
+  - Preserve all other properties (for example: `shadowDatabaseUrl`, `relationMode`, `schemas`, `extensions`, `directUrl`, etc.).
+
+After editing the schema, run `prisma generate`.
+
+### 3) Introduce `prisma.config.ts`
+
+Create `prisma.config.ts` at the repo root (or `prisma.config.mjs` if needed) to centralize Prisma CLI config and env management:
+
+```ts
+import "dotenv/config";
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
+  },
+  datasource: {
+    url: env("DATABASE_URL"),
+  },
+});
+```
+
+- Remove any `prisma.seed` entry from `package.json`; the `seed` command now lives in `prisma.config.ts`.
+
+### 4) ESM & TS Baseline
+
+Ensure **package.json** is ESM-oriented and includes Prisma scripts:
+
+- `"type": "module"`
+- `"scripts"` (at minimum):
+  - `"dev": "tsx src/index.ts"` (or the project’s actual entrypoint)
+  - `"generate": "prisma generate"`
+  - `"migrate": "prisma migrate dev"`
+  - `"build": "tsc -p tsconfig.json"`
+
+Ensure `tsconfig.json` uses an ESM-friendly setup:
+
+- `module: "ESNext"`
+- `moduleResolution: "bundler"`
+- `target: "ES2023"`
+- `strict: true`
+- `esModuleInterop: true`
+
+Adapt these values to the existing config while keeping ESM compatibility.
+
+### 5) Prisma Client Import & Construction
+
+For new or refactored entrypoints, prefer Direct TCP with adapters:
+
+- Import env early with `import "dotenv/config";` (unless Bun).
+- Import the client from the generated path:
+  - Example: `import { PrismaClient } from "../generated/prisma/client.js";` (adjust path as needed).
+- Use the appropriate adapter for the datasource provider and pass it to `PrismaClient`.
+
+If Prisma Accelerate is detected:
+
+- If caching is enabled, **preserve** the existing Accelerate configuration.
+- If caching is not enabled, **suggest** migrating to Direct TCP + adapter but do not change existing Accelerate code automatically.
+
+Always keep generated examples based on Direct TCP for new code while leaving existing Accelerate paths intact.
+
+### 6) Seeding Script Update
+
+Ensure `prisma/seed.ts`:
+
+- Imports env with `import "dotenv/config";` (unless Bun).
+- Imports `PrismaClient` from the generated path.
+- Uses the same adapter configuration as runtime.
+
+Example (Postgres via adapter-pg, adjust adapter per provider):
+
+```ts
+import "dotenv/config";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
+
+// seed…
+```
+
+The seed command is executed via `seed: "tsx prisma/seed.ts"` in `prisma.config.ts` and **not** via `package.json#prisma.seed`.
+
+### 7) Middleware → Extensions
+
+If any `prisma.$use` middleware is detected:
+
+- Inform the user that `$use` middleware has been removed in Prisma v7.
+- Do **not** attempt an automatic migration; instead, describe that they should re-implement behavior using Prisma extensions and refer to the official docs.
+
+### 8) Accelerate Messaging
+
+Depending on detection:
+
+- **Accelerate Caching detected**:
+
+  ```text
+  Prisma Accelerate Caching detected.
+  Prisma v7 fully supports caching scenarios via Accelerate.
+  Your existing Accelerate setup will be preserved.
+  ```
+
+- **Accelerate present without caching**:
+
+  ```text
+  Prisma Accelerate detected without caching.
+
+  Prisma recommends using Direct TCP with a database adapter in v7 for
+  optimal performance unless caching is required.
+
+  Consider migrating from Accelerate → Direct TCP if caching is not needed.
+  (No code changes were applied automatically.)
+  ```
+
+- **No Accelerate**:
+
+  ```text
+  Direct TCP is the recommended default for Prisma v7.
+  Your project will be migrated accordingly using the appropriate adapter.
+  ```
+
+These are informational messages only; do not remove or add Accelerate automatically.
+
+### 9) Scripts & CI
+
+Verify that:
+
+- `package.json` scripts include:
+  - `"generate": "prisma generate"`
+  - `"migrate": "prisma migrate dev"`
+  - Any `dev`/`start` scripts use ESM entrypoints where `dotenv/config` (or equivalent) is loaded early.
+- CI pipelines:
+  - Use Node **≥ 20.19**.
+  - Use TypeScript **≥ 5.4**.
+  - Run `prisma generate`, `prisma migrate dev` (or `migrate deploy` for production), and seeding where appropriate.
+
+### 10) Run & Verify
+
+After migration steps:
+
+1. Run `prisma generate` — should succeed and emit client to `./generated`.
+2. Run `prisma migrate dev` — runs against `DATABASE_URL` (Direct TCP).
+3. Run `tsx prisma/seed.ts` — verify that seed data inserts correctly.
+4. Boot the app:
+   - Confirm `PrismaClient` instantiation uses the adapter.
+   - Confirm queries execute successfully.
+5. If **P1017 / connection** errors occur:
+   - Confirm `DATABASE_URL` and network reachability.
+   - Confirm `import "dotenv/config";` executes before Prisma is constructed.
+6. If **module resolution** errors occur:
+   - Confirm `"type": "module"` in `package.json`, ESM imports, and a regenerated client.
+
+### 11) CLI Flag Changes
+
+Be aware of Prisma v7 CLI changes:
+
+- `prisma db execute`:
+  - `--schema` and `--url` flags are removed.
+  - Database connection is configured via `prisma.config.ts` instead.
+  - Use: `prisma db execute --file ./script.sql`.
+
+- `prisma migrate diff`:
+  - `--from-url`, `--to-url`, `--from-schema-datasource`, `--to-schema-datasource`, and `--shadow-database-url` are removed.
+  - Use the new flags:
+    - `--from-config-datasource`
+    - Configure shadow database URLs in `prisma.config.ts`.
+
+When you detect old flags in scripts or CI, update them to the new forms and route all connection configuration through `prisma.config.ts`.
+
+### 12) Mapped Enum Breaking Change
+
+If the schema uses `@map` on enum values:
+
+- Explain that in Prisma v7, generated TypeScript enums now use `@map` values instead of schema names.
+- Mention the known bug (as of v7.2.0) where using mapped enum values with Prisma Client can cause runtime errors while types expect mapped values and the engine expects schema names.
+- Suggest temporary workarounds:
+  - Use schema names as string literals at runtime (possibly with `as any`).
+  - Or remove `@map` on enums temporarily if different DB values are not strictly required.
+
+Do not auto-edit enums; only suggest concrete changes and highlight the trade-offs.
+
+### 13) Changelog Guidance
+
+When summarizing migration work (for example, in a PR body), include:
+
+- Dependency updates and the added database adapter.
+- Prisma schema generator change and datasource URL removal.
+- New `prisma.config.ts` with centralized configuration.
+- Runtime refactor to Direct TCP with adapter (and any Accelerate messaging, if relevant).
+- ESM/TypeScript config updates.
+- Seed script alignment with the adapter and env loading.
+- CLI flag updates (`db execute` and `migrate diff` changes).
+- Mapped enum breaking change warning (only if `@map` is used on enum values).
+
