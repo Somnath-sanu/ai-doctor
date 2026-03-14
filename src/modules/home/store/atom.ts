@@ -1,4 +1,13 @@
-import { Report } from "@/src/generated/prisma";
+// import { Report } from "@/src/generated/prisma";
+
+type Report = {
+  id: string;
+  userId: string;
+  specialist: string;
+  content: string;
+  createdAt: Date;
+};
+
 import { atom } from "jotai";
 
 export type ReportWithoutUserId = Omit<Report, "userId">;
