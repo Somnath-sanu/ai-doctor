@@ -1,4 +1,12 @@
-import { Report } from "@/src/generated/prisma";
+// import { type Report } from "@/src/generated/prisma";
+
+type Report = {
+  id: string;
+  userId: string;
+  specialist: string;
+  content: string;
+  createdAt: Date;
+};
 
 /**
  * Generates a medical report ( can work on clien side as well )
@@ -6,7 +14,7 @@ import { Report } from "@/src/generated/prisma";
 
 export const generateReport = async (
   specialist: string,
-  transcript: string[]
+  transcript: string[],
 ): Promise<Report | null> => {
   try {
     const response = await fetch("/api/report", {
