@@ -52,7 +52,7 @@ export const AgentList = ({ limit, showViewAllLink }: AgentListProps) => {
           {visibleAgents.map((d) => (
             <Card
               key={d.id}
-              className="relative flex flex-col overflow-hidden border bg-card/80 shadow-sm"
+              className="relative flex flex-col overflow-hidden border-border/70 bg-card/86 p-0 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="relative">
                 <Image
@@ -61,7 +61,7 @@ export const AgentList = ({ limit, showViewAllLink }: AgentListProps) => {
                   width={100}
                   height={50}
                   className={cn(
-                    "w-full object-cover h-30",
+                    "h-40 w-full object-cover",
                     !d.isAvailable && "blur-sm"
                   )}
                 />
@@ -72,15 +72,20 @@ export const AgentList = ({ limit, showViewAllLink }: AgentListProps) => {
                 )}
               </div>
 
-              <div className="flex flex-1 flex-col gap-2 px-4 py-3">
-                <h3 className="text-sm font-semibold">{d.specialist}</h3>
-                <p className="line-clamp-2 text-xs text-muted-foreground font-medium">
+              <div className="flex flex-1 flex-col gap-3 px-5 py-5">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary/80">
+                    AI Specialist
+                  </p>
+                  <h3 className="text-base font-semibold">{d.specialist}</h3>
+                </div>
+                <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
                   {d.description}
                 </p>
 
                 {d.isAvailable && d.assistantId && (
                   <Button
-                    className="mt-2 w-full cursor-pointer"
+                    className="mt-auto w-full"
                     variant="outline"
                     onClick={() => handleConsult(d)}
                   >
@@ -97,9 +102,9 @@ export const AgentList = ({ limit, showViewAllLink }: AgentListProps) => {
             <Button
               asChild
               variant="ghost"
-              className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
             >
-              <Link href="/doctors">
+              <Link href="/app/doctors">
                 View all doctors
                 <ArrowRightIcon className="ml-1 size-3.5" />
               </Link>

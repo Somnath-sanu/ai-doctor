@@ -28,19 +28,19 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-card/60 px-6 py-10 text-center shadow-sm",
+        "surface-panel flex flex-col items-center justify-center gap-5 border-dashed px-6 py-12 text-center",
         className,
       )}
     >
       {Icon ? (
-        <div className="inline-flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Icon className="size-5" />
+        <div className="inline-flex size-14 items-center justify-center rounded-full bg-primary/12 text-primary shadow-xs ring-8 ring-primary/6">
+          <Icon className="size-6" />
         </div>
       ) : null}
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
         {description ? (
-          <p className="max-w-md text-sm text-muted-foreground">
+          <p className="max-w-md text-sm leading-6 text-muted-foreground">
             {description}
           </p>
         ) : null}
@@ -59,4 +59,3 @@ export function EmptyState({
     </div>
   );
 }
-

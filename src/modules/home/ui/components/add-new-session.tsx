@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Button } from "@/src/components/ui/button";
 import {
   Dialog,
@@ -47,9 +49,13 @@ export const AddNewSession = () => {
               Cancel
             </Button>
           </DialogClose>
-          <Button className="cursor-pointer" variant={"outline"}>
-            Next <ArrowRightIcon />
-          </Button>
+          <DialogClose asChild>
+            <Button asChild className="cursor-pointer" variant={"outline"}>
+              <Link href="/app/doctors">
+                Next <ArrowRightIcon />
+              </Link>
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

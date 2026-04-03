@@ -1,11 +1,31 @@
-// import { type Report } from "@/src/generated/prisma";
-
-type Report = {
+export type Report = {
   id: string;
   userId: string;
+  consultationId?: string | null;
+  finalCarePlanId?: string | null;
   specialist: string;
+  title?: string | null;
   content: string;
+  kind: "AI_DRAFT" | "DOCTOR_FINAL";
   createdAt: Date;
+  updatedAt?: Date;
+};
+
+export type ConsultationResponse = {
+  consultation: {
+    id: string;
+    specialist: string;
+    urgency: string;
+    requiresDoctorReview: boolean;
+  };
+  report: Report;
+  ticket: {
+    id: string;
+    specialty: string;
+    status: string;
+  } | null;
+  ticketCreated: boolean;
+  urgency: string;
 };
 
 /**
@@ -14,8 +34,8 @@ type Report = {
 
 export const generateReport = async (
   specialist: string,
-  transcript: string[],
-): Promise<Report | null> => {
+  transcript: Array<{ role: string; text: string }>,
+): Promise<ConsultationResponse | null> => {
   try {
     const response = await fetch("/api/report", {
       method: "POST",

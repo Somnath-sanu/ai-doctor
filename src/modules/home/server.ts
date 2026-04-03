@@ -1,32 +1,12 @@
 "server-only";
 
-import { CREDITS } from "@/src/constants";
-import prisma from "@/src/lib/db";
+import { syncCurrentUser } from "@/src/lib/auth";
 
 export const upserUser = async (
-  firstName: string | null,
-  lastName: string | null,
-  email: string,
-  id: string
+  _firstName: string | null,
+  _lastName: string | null,
+  _email: string,
+  _id: string
 ) => {
-  try {
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (!existingUser) {
-      await prisma.user.create({
-        data: {
-          id,
-          email: email,
-          name: `${firstName} ${lastName}`,
-          credits: CREDITS,
-        },
-      });
-    }
-  } catch {
-    console.error("Error saving user data to DB");
-  }
+  return syncCurrentUser();
 };

@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { ClerkProviderWrapper } from "../providers/clerk";
 import { Toaster } from "../components/ui/sonner";
 import { Provider } from "jotai";
 import { ThemeProvider } from "../providers/theme";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
 });
 
@@ -63,7 +68,7 @@ export default function RootLayout({
     <ClerkProviderWrapper>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${manrope.variable} ${jetbrainsMono.variable} ${fraunces.variable} antialiased`}
         >
           <ThemeProvider>
             <Provider>

@@ -13,7 +13,8 @@
     "db:reset": "pnpm dlx prisma migrate reset",
     "postinstall": "prisma generate",
     "generate": "prisma generate",
-    "migrate": "prisma migrate dev"
+    "migrate": "prisma migrate dev",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",

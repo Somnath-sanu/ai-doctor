@@ -1,11 +1,14 @@
-// import { Report } from "@/src/generated/prisma";
-
 type Report = {
   id: string;
   userId: string;
+  consultationId?: string | null;
+  finalCarePlanId?: string | null;
   specialist: string;
+  title?: string | null;
   content: string;
+  kind: "AI_DRAFT" | "DOCTOR_FINAL";
   createdAt: Date;
+  updatedAt?: Date;
 };
 
 import { atom } from "jotai";

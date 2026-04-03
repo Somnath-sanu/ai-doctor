@@ -32,8 +32,11 @@ export const HistoryList = () => {
 
   if (!reports) {
     return (
-      <div className="flex items-center justify-center py-10">
-        <Loader2Icon className="size-8 animate-spin" />
+      <div className="surface-panel flex items-center justify-center gap-3 py-12">
+        <Loader2Icon className="size-6 animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">
+          Loading consultation history
+        </span>
       </div>
     );
   }
@@ -54,7 +57,7 @@ export const HistoryList = () => {
           }
         />
       ) : (
-        <ScrollablePane className="mt-1 space-y-3 py-1">
+        <ScrollablePane className="mt-1 space-y-4 py-1">
           {reports.map((report) => (
             <ReportCard
               key={report.id}
