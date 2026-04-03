@@ -1,24 +1,15 @@
 import type { ReactNode } from "react";
 
-import { AppSidebar } from "@/src/components/app-shell/app-sidebar";
-import { AppTopbar } from "@/src/components/app-shell/app-topbar";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/src/components/ui/sidebar";
+import { DashboardShell } from "@/src/components/app-shell/dashboard-shell";
+import { syncCurrentUser } from "@/src/lib/auth";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <AppTopbar />
-        <div className="flex-1 flex flex-col px-4 py-4 md:px-8 md:py-6">
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+export default async function AppLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  await syncCurrentUser();
+
+  return <DashboardShell>{children}</DashboardShell>;
 }
-
 

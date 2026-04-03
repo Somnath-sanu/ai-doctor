@@ -7,25 +7,167 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+  EMERGENCY
+}
+
+enum ConfidenceBand {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ConsultationStatus {
+  AI_COMPLETED
+  ESCALATED
+  DOCTOR_COMPLETED
+}
+
+enum DoctorTicketStatus {
+  OPEN
+  CLAIMED
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum ReportKind {
+  AI_DRAFT
+  DOCTOR_FINAL
+}
+
 model User {
-  id      String @id
-  name    String
-  email   String
-  credits Int
-
-  reports Report[]
-
-  @@unique([email])
+  id                String          @id
+  name              String
+  email             String          @unique
+  credits           Int             @default(0)
+  role              UserRole        @default(PATIENT)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  reports           Report[]        @relation("UserReports")
+  consultations     Consultation[]  @relation("PatientConsultations")
+  assignedTickets   DoctorTicket[]  @relation("DoctorAssignments")
+  patientTickets    DoctorTicket[]  @relation("PatientTickets")
+  carePlansAuthored FinalCarePlan[] @relation("DoctorCarePlans")
+  carePlansForUser  FinalCarePlan[] @relation("PatientCarePlans")
+  doctorProfile     DoctorProfile?
 }
 
 model Report {
-  id         String   @id @default(cuid())
-  userId     String
-  specialist String
-  content    String
-  createdAt  DateTime @default(now())
+  id              String         @id @default(cuid())
+  userId          String
+  consultationId  String?
+  finalCarePlanId String?
+  specialist      String
+  title           String?
+  content         String
+  kind            ReportKind     @default(AI_DRAFT)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation("UserReports", fields: [userId], references: [id], onDelete: Cascade)
+  consultation    Consultation?  @relation(fields: [consultationId], references: [id], onDelete: SetNull)
+  finalCarePlan   FinalCarePlan? @relation(fields: [finalCarePlanId], references: [id], onDelete: SetNull)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  @@index([consultationId])
+  @@index([finalCarePlanId])
   @@index([userId])
+}
+
+model DoctorProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  specialty     String
+  licenseNumber String?
+  bio           String?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Consultation {
+  id                 String             @id @default(cuid())
+  patientId          String
+  specialist         String
+  transcript         Json
+  presentingComplaint String?
+  symptomSummary     String?
+  durationContext    String?
+  aiStructuredReport Json?
+  aiDraftReport      String
+  confidenceBand     ConfidenceBand
+  urgency            UrgencyLevel
+  riskFlags          Json?
+  suggestedNextSteps Json?
+  draftMedications   Json?
+  requiresDoctorReview Boolean         @default(false)
+  doctorReviewReason String?
+  status             ConsultationStatus @default(AI_COMPLETED)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  patient            User              @relation("PatientConsultations", fields: [patientId], references: [id], onDelete: Cascade)
+  ticket             DoctorTicket?
+  finalCarePlan      FinalCarePlan?
+  reports            Report[]
+
+  @@index([patientId, createdAt])
+  @@index([status, createdAt])
+}
+
+model DoctorTicket {
+  id               String            @id @default(cuid())
+  consultationId   String            @unique
+  patientId        String
+  specialty        String
+  urgency          UrgencyLevel
+  status           DoctorTicketStatus @default(OPEN)
+  summary          String
+  aiDraftReport    String
+  aiStructuredReport Json?
+  claimedByDoctorId String?
+  claimedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  consultation     Consultation      @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  patient          User              @relation("PatientTickets", fields: [patientId], references: [id], onDelete: Cascade)
+  claimedByDoctor  User?             @relation("DoctorAssignments", fields: [claimedByDoctorId], references: [id], onDelete: SetNull)
+  finalCarePlan    FinalCarePlan?
+
+  @@index([specialty, status, createdAt])
+  @@index([claimedByDoctorId, status])
+  @@index([patientId, createdAt])
+}
+
+model FinalCarePlan {
+  id             String       @id @default(cuid())
+  consultationId String       @unique
+  ticketId       String       @unique
+  patientId      String
+  doctorId       String
+  diagnosis      String
+  advice         String
+  medications    Json
+  tests          Json
+  followUp       String?
+  finalReport    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  ticket         DoctorTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  patient        User         @relation("PatientCarePlans", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor         User         @relation("DoctorCarePlans", fields: [doctorId], references: [id], onDelete: Cascade)
+  reports        Report[]
+
+  @@index([patientId, createdAt])
+  @@index([doctorId, createdAt])
 }

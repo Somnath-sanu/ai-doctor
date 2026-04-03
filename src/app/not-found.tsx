@@ -30,7 +30,7 @@ export default function NotFound() {
                 Go back home
               </Link>
               <Link
-                href="/consultations"
+                href="/app/consultations"
                 className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-4 py-2 text-sm font-medium text-emerald-950 shadow-lg shadow-emerald-500/40 hover:bg-emerald-400 transition-colors"
               >
                 Open consultations
@@ -47,4 +47,3 @@ export default function NotFound() {
     </html>
   );
 }
-

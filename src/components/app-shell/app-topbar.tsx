@@ -11,10 +11,14 @@ import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 
 function getTitle(pathname: string): string {
-  if (pathname === "/") return "Dashboard";
-  if (pathname.startsWith("/consultations")) return "Consultations";
-  if (pathname.startsWith("/reports")) return "Reports";
-  if (pathname.startsWith("/doctors")) return "Doctors";
+  if (pathname === "/app") return "Dashboard";
+  if (pathname.startsWith("/app/consultations")) return "Consultations";
+  if (pathname.startsWith("/app/reports")) return "Reports";
+  if (pathname.startsWith("/app/doctors")) return "AI Specialists";
+  if (pathname === "/doctor") return "Doctor Desk";
+  if (pathname.startsWith("/doctor/queue")) return "Specialty Queue";
+  if (pathname.startsWith("/doctor/my-tickets")) return "My Tickets";
+  if (pathname.startsWith("/doctor/tickets")) return "Ticket Review";
   if (pathname.startsWith("/billing")) return "Billing & Plans";
   if (pathname.startsWith("/settings")) return "Settings";
   return "Dashboard";
@@ -41,15 +45,21 @@ function ThemeToggle() {
 
 export function AppTopbar() {
   const pathname = usePathname();
+  const searchPlaceholder = pathname.startsWith("/doctor")
+    ? "Search tickets"
+    : "Search consultations";
 
   const title = useMemo(() => getTitle(pathname), [pathname]);
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-      <div className="flex h-14 items-center gap-3 px-3 md:px-6">
+    <header className="sticky top-0 z-20 px-1 pb-4">
+      <div className="surface-panel flex h-16 items-center gap-3 px-3 md:px-5">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="md:hidden" />
           <div className="flex flex-col">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/75">
+              MEDIVA
+            </span>
             <h1 className="text-base font-semibold tracking-tight md:text-lg">
               {title}
             </h1>
@@ -57,11 +67,11 @@ export function AppTopbar() {
         </div>
 
         <div className="ml-auto flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 rounded-full border bg-background/60 px-3 py-1.5 text-xs text-muted-foreground max-w-xs">
+          <div className="hidden max-w-xs items-center gap-2 rounded-full border border-border/70 bg-background/75 px-3 py-1.5 text-xs text-muted-foreground md:flex">
             <Search className="size-3.5" />
             <Input
-              placeholder="Search consultations"
-              className="h-6 border-none px-0 text-xs focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/60 shadow-none text-foreground"
+              placeholder={searchPlaceholder}
+              className="h-6 border-none bg-transparent px-0 text-xs text-foreground shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
@@ -69,7 +79,7 @@ export function AppTopbar() {
 
           <button
             type="button"
-            className="inline-flex size-8 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-sm hover:text-foreground"
+            className="inline-flex size-9 cursor-pointer items-center justify-center rounded-full border border-border/70 bg-background/85 text-muted-foreground shadow-xs transition hover:-translate-y-0.5 hover:text-foreground"
           >
             <Bell className="size-4" />
             <span className="sr-only">Notifications</span>
@@ -81,4 +91,3 @@ export function AppTopbar() {
     </header>
   );
 }
-

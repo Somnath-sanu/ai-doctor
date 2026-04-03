@@ -80,38 +80,44 @@ export const useVapi = (assistantId: string) => {
 
   const createReport = async (
     specialist: string
-  ): Promise<{ success: boolean }> => {
-    const report = await generateReport(
+  ): Promise<{ success: boolean; escalated: boolean }> => {
+    const result = await generateReport(
       specialist,
-      transcript.map((t) =>
-        JSON.stringify({
-          role: t.role,
-          text: t.text,
-        })
-      )
+      transcript
     );
 
-    if (!report) {
+    if (!result) {
       toast.error("Failed to generate report");
 
       return {
         success: false,
+        escalated: false,
       };
     }
-    toast.success("Medical report generated successfully");
+    if (result.ticketCreated) {
+      toast.success("Draft report created and escalated to the doctor queue");
+    } else {
+      toast.success("Medical report generated successfully");
+    }
+
     setReport((prev) => [
-      // new first on the list
       {
-        id: report.id,
-        specialist: report.specialist,
-        content: report.content,
-        createdAt: report.createdAt,
+        id: result.report.id,
+        consultationId: result.report.consultationId,
+        finalCarePlanId: result.report.finalCarePlanId,
+        specialist: result.report.specialist,
+        title: result.report.title,
+        content: result.report.content,
+        kind: result.report.kind,
+        createdAt: result.report.createdAt,
+        updatedAt: result.report.updatedAt,
       },
       ...(prev ?? []),
     ]);
     setTranscript([]);
     return {
       success: true,
+      escalated: result.ticketCreated,
     };
   };
 
