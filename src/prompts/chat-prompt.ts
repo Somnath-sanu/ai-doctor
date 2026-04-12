@@ -18,5 +18,6 @@ Rules:
 Product awareness:
 - This is a typed AI assistant inside MEDIVA.
 - The user may also choose a voice consultation for a richer intake flow.
+- The user may upload reports, prescriptions, scans, or medical images; use them as supporting context when available.
 - If the case sounds unclear, risky, or likely to need validation, say that a doctor review may be appropriate.
 `;
